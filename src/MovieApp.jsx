@@ -1,8 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 export const MovieApp = () => {
   const [search, setSearch] = useState("");
   const [movieList, setMovieList] = useState([]);
+  const [expandedCard, setExpandedCard] = useState(null);
   const urlBase = `https://api.themoviedb.org/3/search/movie`;
   const API_KEY = "21f42dff84a056951db0a2777b6817cd";
 
@@ -39,10 +40,19 @@ export const MovieApp = () => {
     return text;
   };
 
-  function roundUp(num, decimal){
-    const factor =Math.pow(10,decimal)
-    return(Math.ceil(num*factor)/factor)
-  }
+  const roundUp = (num, decimal) => {
+    const factor = Math.pow(10, decimal);
+    return Math.ceil(num * factor) / factor;
+  };
+
+  const toggleExpand = (index) => {
+    if (expandedCard === index) {
+      setExpandedCard(null); // Collapse if clicking again on the same card
+    } else {
+      setExpandedCard(index);
+    }
+  };
+
   return (
     <div className="container">
       <h1 className="title">AppMovie</h1>
@@ -57,22 +67,31 @@ export const MovieApp = () => {
       </form>
       {movieList.length > 0 && (
         <div className="movieList">
-          {movieList.map((movie) => (
+          {movieList.map((movie, index) => (
             <div key={movie.id} className="movieCard">
               {movie.poster_path && (
                 <img
-                  alt={'No hay imagen disponible'}
+                  alt="No hay imagen disponible"
                   src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                 />
               )}
               <h2>{movie.title}</h2>
-              <p className="paragraph">{truncateText(movie.overview, 100)}</p>
+              <p className="paragraph">
+                {expandedCard === index
+                  ? movie.overview
+                  : truncateText(movie.overview, 100)}
+              </p>
               <div className="details">
                 <div className="detailsP">
                   <p>Estrenada: {movie.release_date}</p>
                   <p>Valoracion TMBD: {roundUp(movie.vote_average, 1)}</p>
                 </div>
-                <button className="infoButton">Leer mas</button>
+                <button
+                  className="infoButton"
+                  onClick={() => toggleExpand(index)}
+                >
+                  {expandedCard === index ? "Cerrar" : "Leer más"}
+                </button>
               </div>
             </div>
           ))}
@@ -81,3 +100,4 @@ export const MovieApp = () => {
     </div>
   );
 };
+
